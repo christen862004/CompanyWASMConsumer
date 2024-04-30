@@ -1,0 +1,68 @@
+﻿@page "/emp/Edit/{id:int}"
+<h3>EditEmployeeComponent</h3>
+@if (EmpObj != null)
+{
+    <EditForm Model="EmpObj" OnValidSubmit="SaveEmp">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
+        <ValidationSummary></ValidationSummary>
+        <div>
+            <label>Name</label>
+            <InputText class="form form-control" @bind-Value="EmpObj.Name"></InputText>
+        </div>
+        <div>
+            <label>Address</label>
+            <InputText class="form form-control" @bind-Value="EmpObj.Address"></InputText>
+        </div>
+        <div>
+            <label>Salary</label>
+            <InputNumber class="form form-control" @bind-Value="EmpObj.Salary"></InputNumber>
+        </div>
+       
+        <div>
+            <label>DEpartment</label>
+            <InputSelect class="form form-control" @bind-Value="EmpObj.DeptID">
+                @foreach (var deptItem in DeptList)
+                {
+                    <option value="@deptItem.Id">@deptItem.Name</option>
+                }
+            </InputSelect>
+        </div>
+        <input type="submit" class="btn btn-success" value="Save"/>
+    </EditForm>
+}
+else
+{
+    <h2>Wait ... or invalid id</h2>
+}
+
+
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    [Inject]
+    public IServices<Employee> EmpService { get; set; }
+
+    [Inject]
+    public IServices<Department> DeptService { get; set; }
+
+    [Inject]
+    public NavigationManager NavManager { get; set; }
+
+    public Employee EmpObj { get; set; }
+    public List<Department> DeptList { get; set; }
+
+    protected async override Task OnInitializedAsync()
+    {
+        EmpObj= await EmpService.GetByID(id);
+        DeptList = await DeptService.GetAll();
+        base.OnInitializedAsync();
+    }
+    async Task SaveEmp()
+    {
+        await EmpService.Update(id, EmpObj);
+        NavManager.NavigateTo("/Emps");
+
+    }
+}
